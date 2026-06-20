@@ -1,0 +1,43 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  nome: MyString
+  cpf: MyString
+  data_nascimento: 2026-06-20
+  telefone: MyString
+  whatsapp: false
+  id_whatsapp: MyString
+  convenio: MyString
+  plano_convenio: MyString
+  sexo_biologico: MyString
+  logradouro: MyString
+  numero: MyString
+  cep: MyString
+  bairro: MyString
+  complemento: MyString
+  cidade: MyString
+  uf: MyString
+  numero_carteira: MyString
+  data_validade_carteira: 2026-06-20
+  data_pedido_medico: 2026-06-20
+
+two:
+  nome: MyString
+  cpf: MyString
+  data_nascimento: 2026-06-20
+  telefone: MyString
+  whatsapp: false
+  id_whatsapp: MyString
+  convenio: MyString
+  plano_convenio: MyString
+  sexo_biologico: MyString
+  logradouro: MyString
+  numero: MyString
+  cep: MyString
+  bairro: MyString
+  complemento: MyString
+  cidade: MyString
+  uf: MyString
+  numero_carteira: MyString
+  data_validade_carteira: 2026-06-20
+  data_pedido_medico: 2026-06-20

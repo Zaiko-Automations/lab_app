@@ -1,0 +1,130 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+  <!-- Page Header -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+    <div>
+      <h2 class="text-2xl font-bold text-primary font-heading tracking-tight">Fila de Revisão de Pedidos</h2>
+      <p class="text-sm text-slate-500 mt-1">Revisão humana dos dados extraídos pelo agente de IA Lucas.</p>
+    </div>
+    
+    <!-- Search and Status filter -->
+    <div class="flex flex-col sm:flex-row items-center gap-3">
+      <%= form_tag root_path, method: :get, class: "w-full sm:w-auto flex" do %>
+        <%= hidden_field_tag :status, @status %>
+        <input type="text" name="search" value="<%= params[:search] %>" placeholder="Buscar por nome, CPF ou conversa..." 
+               class="w-full sm:w-64 px-4 py-2 border border-slate-300 rounded-l-xl focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary text-sm shadow-sm">
+        <button type="submit" class="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-r-xl text-sm font-semibold transition-all shadow-sm cursor-pointer">
+          Buscar
+        </button>
+      <% end %>
+      
+      <% if params[:search].present? || params[:status].present? %>
+        <%= link_to "Limpar filtros", root_path, class: "text-xs text-slate-500 hover:text-primary transition-colors underline" %>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Status Tabs -->
+  <div class="flex border-b border-slate-200 mb-6 gap-2">
+    <%= link_to root_path(status: 'pending', search: params[:search]), 
+                class: "px-5 py-3 text-sm font-bold border-b-2 transition-all #{@status == 'pending' ? 'border-secondary text-secondary' : 'border-transparent text-slate-500 hover:text-primary hover:border-slate-300'}" do %>
+      Pendentes
+      <span class="ml-1.5 px-2 py-0.5 text-xs font-semibold rounded-full bg-amber-500/10 text-amber-600">
+        <%= MedicalRequest.where(status: 'pending').count %>
+      </span>
+    <% end %>
+    
+    <%= link_to root_path(status: 'validated', search: params[:search]), 
+                class: "px-5 py-3 text-sm font-bold border-b-2 transition-all #{@status == 'validated' ? 'border-secondary text-secondary' : 'border-transparent text-slate-500 hover:text-primary hover:border-slate-300'}" do %>
+      Validados
+      <span class="ml-1.5 px-2 py-0.5 text-xs font-semibold rounded-full bg-emerald-500/10 text-emerald-600">
+        <%= MedicalRequest.where(status: 'validated').count %>
+      </span>
+    <% end %>
+  </div>
+
+  <!-- Requests Table/Grid -->
+  <% if @medical_requests.any? %>
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-100">
+          <thead class="bg-slate-50/50">
+            <tr>
+              <th scope="col" class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">Paciente</th>
+              <th scope="col" class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">Canal / Conversa</th>
+              <th scope="col" class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">Solicitante</th>
+              <th scope="col" class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">Data de Recebimento</th>
+              <% if @status == 'validated' %>
+                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">Validador / Data</th>
+              <% end %>
+              <th scope="col" class="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-slate-400">Ações</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 bg-white">
+            <% @medical_requests.each do |request| %>
+              <tr class="hover:bg-slate-50/50 transition-colors">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex flex-col">
+                    <span class="text-sm font-bold text-slate-900"><%= request.patient.nome %></span>
+                    <span class="text-xs text-slate-500 mt-0.5">CPF: <%= request.patient.cpf.gsub(/(\d{3})(\d{3})(\d{3})(\d{2})/, '\1.\2.\3-\4') rescue request.patient.cpf %></span>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex flex-col">
+                    <span class="text-sm font-medium text-slate-700 flex items-center gap-1.5">
+                      <% if request.patient.whatsapp %>
+                        <svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.73-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.965C16.528 2.01 14.07 1.006 11.45 1.005 6.012 1.005 1.587 5.378 1.583 10.81c-.001 1.745.462 3.447 1.343 4.966l-.982 3.595 3.703-.967zM16.52 13.9c-.274-.137-1.62-.8-1.87-.892-.25-.092-.43-.137-.61.137-.18.274-.7.892-.857 1.077-.158.18-.316.2-.59.063-.274-.137-1.157-.426-2.203-1.359-.814-.726-1.364-1.623-1.524-1.897-.16-.274-.017-.422.12-.558.123-.122.274-.32.41-.48.138-.16.183-.274.275-.457.09-.18.046-.339-.023-.477-.07-.137-.61-1.474-.836-2.02-.22-.53-.442-.457-.61-.466-.157-.008-.337-.01-.518-.01s-.475.068-.723.339c-.25.274-.95.93-.95 2.267s.973 2.628 1.11 2.81c.137.18 1.916 2.927 4.64 4.103.648.28 1.153.448 1.547.573.652.207 1.246.177 1.715.107.522-.078 1.62-.662 1.85-1.3s.23-1.186.16-1.3c-.07-.113-.265-.18-.54-.317z"/>
+                        </svg>
+                      <% end %>
+                      Conectado
+                    </span>
+                    <span class="text-xs text-slate-500 mt-0.5">ID: <%= request.conversation_id %></span>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-700">
+                  <div class="flex flex-col">
+                    <span class="font-medium"><%= request.requester.nome %></span>
+                    <span class="text-xs text-slate-400">Conselho: <%= request.requester.numero_conselho %></span>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                  <div class="flex flex-col">
+                    <span><%= request.created_at.strftime("%d/%m/%Y às %H:%M") %></span>
+                    <span class="text-xs text-slate-400">(há <%= time_ago_in_words(request.created_at) %>)</span>
+                  </div>
+                </td>
+                <% if @status == 'validated' %>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                    <div class="flex flex-col">
+                      <span class="font-medium text-slate-900"><%= request.validated_by&.email || "Sistema" %></span>
+                      <span class="text-xs text-slate-400"><%= request.validated_at&.strftime("%d/%m/%Y às %H:%M") %></span>
+                    </div>
+                  </td>
+                <% end %>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <% if request.pending? %>
+                    <%= link_to "Revisar Dados", medical_request_path(request), class: "inline-flex items-center px-3.5 py-1.5 bg-secondary hover:bg-secondary-hover text-white text-xs font-bold rounded-lg shadow-sm transition-all cursor-pointer" %>
+                  <% else %>
+                    <%= link_to "Ver Histórico", medical_request_path(request), class: "inline-flex items-center px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg border border-slate-200 transition-all cursor-pointer" %>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% else %>
+    <div class="bg-white border border-slate-100 rounded-2xl p-12 text-center shadow-sm">
+      <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
+        <svg class="w-8 h-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      </div>
+      <h3 class="text-lg font-bold text-slate-900 font-heading">Nenhum pedido encontrado</h3>
+      <p class="text-slate-500 text-sm mt-1 max-w-sm mx-auto">
+        Não há registros na fila <%= @status == 'pending' ? 'pendente' : 'validada' %> no momento.
+      </p>
+    </div>
+  <% end %>
+</div>

@@ -1,1 +1,27 @@
 @import "tailwindcss";
+
+@theme {
+  --color-primary: #002b47;
+  --color-secondary: #23c0b5;
+  --color-primary-hover: #001f33;
+  --color-secondary-hover: #1ca39a;
+}
+
+/* Custom UI enhancements */
+.btn-primary {
+  background-color: var(--color-primary);
+  color: white;
+  transition: all 0.2s ease-in-out;
+}
+.btn-primary:hover {
+  background-color: var(--color-primary-hover);
+}
+.btn-secondary {
+  background-color: var(--color-secondary);
+  color: white;
+  transition: all 0.2s ease-in-out;
+}
+.btn-secondary:hover {
+  background-color: var(--color-secondary-hover);
+}
+
