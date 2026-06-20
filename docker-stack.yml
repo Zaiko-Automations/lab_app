@@ -1,53 +1,65 @@
-version: '3.8'
+version: "3.7"
 
 services:
   web:
-    image: ghcr.io/YOUR_GITHUB_USERNAME/lab_app:latest
+    # Imagem construida localmente na VPS com: docker build -t lab_app:latest .
+    image: lab_app:latest
     environment:
       - RAILS_ENV=production
       - RAILS_MAX_THREADS=5
       - RAILS_LOG_TO_STDOUT=true
-      - DATABASE_URL=postgres://postgres_user:postgres_password@db:5432/lab_app_production
-      - WEBHOOK_API_TOKEN=change_me_token_seguro
-      - SECRET_KEY_BASE=change_me_secret_key_base
+      - RAILS_SERVE_STATIC_FILES=true
+      - DATABASE_URL=postgres://lab_user:TROQUE_SENHA_AQUI@db:5432/lab_app_production
+      - WEBHOOK_API_TOKEN=TROQUE_TOKEN_AQUI
+      - SECRET_KEY_BASE=TROQUE_SECRET_KEY_BASE_AQUI
       - SKIP_DB_PREPARE=true
     networks:
-      - traefik-public
+      - network_public
       - db-network
     volumes:
-      - rails-storage:/rails/storage
+      - rails_storage:/rails/storage
     deploy:
-      replicas: 2
+      replicas: 1
       update_config:
         parallelism: 1
         delay: 10s
         order: start-first
-      rollback_config:
-        parallelism: 1
-        order: stop-first
       restart_policy:
         condition: on-failure
         delay: 5s
         max_attempts: 3
         window: 120s
+      placement:
+        constraints:
+          - node.role == manager
       labels:
         - "traefik.enable=true"
-        # Substitua 'seulaboratorio.com.br' pelo seu domínio real
-        - "traefik.http.routers.appvida.rule=Host(`vida.seulaboratorio.com.br`)"
-        - "traefik.http.routers.appvida.entrypoints=websecure"
-        - "traefik.http.routers.appvida.tls=true"
-        - "traefik.http.routers.appvida.tls.certresolver=letsencryptresolver"
-        - "traefik.http.services.appvida.loadbalancer.server.port=3000"
-        # Healthcheck integration with Traefik
-        - "traefik.http.services.appvida.loadbalancer.healthcheck.path=/up"
-        - "traefik.http.services.appvida.loadbalancer.healthcheck.interval=10s"
-        - "traefik.http.services.appvida.loadbalancer.healthcheck.timeout=3s"
+        - "traefik.docker.network=network_public"
+
+        # Router HTTP -> HTTPS redirect
+        - "traefik.http.routers.labapp-http.rule=Host(`labapp.zaikohub.com.br`)"
+        - "traefik.http.routers.labapp-http.entrypoints=web"
+        - "traefik.http.routers.labapp-http.middlewares=redirect-https@docker"
+
+        # Router HTTPS
+        - "traefik.http.routers.labapp.rule=Host(`labapp.zaikohub.com.br`)"
+        - "traefik.http.routers.labapp.entrypoints=websecure"
+        - "traefik.http.routers.labapp.tls=true"
+        - "traefik.http.routers.labapp.tls.certresolver=letsencryptresolver"
+        - "traefik.http.routers.labapp.priority=10"
+
+        # Service (porta do Rails)
+        - "traefik.http.services.labapp.loadbalancer.server.port=3000"
+
+        # Healthcheck via /up
+        - "traefik.http.services.labapp.loadbalancer.healthcheck.path=/up"
+        - "traefik.http.services.labapp.loadbalancer.healthcheck.interval=10s"
 
   db:
     image: postgres:15-alpine
     environment:
-      - POSTGRES_USER=postgres_user
-      - POSTGRES_PASSWORD=postgres_password
+      - POSTGRES_USER=lab_user
+      - POSTGRES_PASSWORD=TROQUE_SENHA_AQUI
       - POSTGRES_DB=lab_app_production
     networks:
       - db-network
@@ -57,31 +69,37 @@ services:
       replicas: 1
       placement:
         constraints:
-          - node.role == manager # Geralmente managers têm volumes locais persistidos mais estáveis
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
 
-  # Serviço temporário para rodar migrações ao realizar deploy
+  # Executa migrações durante deploy (roda 1x e termina)
   db-migrate:
-    image: ghcr.io/YOUR_GITHUB_USERNAME/lab_app:latest
-    command: ["bin/rails", "db:migrate"]
+    image: lab_app:latest
+    command: ["bin/rails", "db:migrate", "db:seed"]
     environment:
       - RAILS_ENV=production
-      - DATABASE_URL=postgres://postgres_user:postgres_password@db:5432/lab_app_production
+      - DATABASE_URL=postgres://lab_user:TROQUE_SENHA_AQUI@db:5432/lab_app_production
+      - SECRET_KEY_BASE=TROQUE_SECRET_KEY_BASE_AQUI
     networks:
       - db-network
     deploy:
+      replicas: 1
       restart_policy:
         condition: on-failure
+        max_attempts: 3
       placement:
         constraints:
           - node.role == manager
 
 volumes:
   postgres_data:
-  rails-storage:
+  rails_storage:
 
 networks:
-  traefik-public:
+  network_public:
     external: true
+    name: network_public
   db-network:
     driver: overlay
     attachable: true

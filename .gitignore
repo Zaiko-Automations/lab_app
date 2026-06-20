@@ -38,3 +38,12 @@
 !/app/assets/builds/.keep
 
 /node_modules
+
+# SQLite dev/test databases (production uses PostgreSQL)
+/db/*.sqlite3
+/db/*.sqlite3-shm
+/db/*.sqlite3-wal
+
+# Yarn PnP
+.pnp.cjs
+.pnp.loader.mjs
