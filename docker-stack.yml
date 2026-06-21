@@ -50,11 +50,7 @@ services:
 
         # Service (porta do Rails)
         - "traefik.http.services.labapp.loadbalancer.server.port=3000"
-
-        # Healthcheck via /up
-        - "traefik.http.services.labapp.loadbalancer.healthcheck.path=/up"
-        - "traefik.http.services.labapp.loadbalancer.healthcheck.scheme=http"
-        - "traefik.http.services.labapp.loadbalancer.healthcheck.interval=10s"
+        - "traefik.http.services.labapp.loadbalancer.server.scheme=http"
 
   db:
     image: postgres:15-alpine
