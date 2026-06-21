@@ -90,9 +90,9 @@ class ProcessWebhookJob < ApplicationJob
       end
 
       # 5. Decode and attach base64 images
-      attach_base64(medical_request, :documento, imagens_data[:documento], "documento_#{conversa_id}.jpg")
-      attach_base64(medical_request, :pedido_medico, imagens_data[:pedido_medico], "pedido_medico_#{conversa_id}.jpg")
-      attach_base64(medical_request, :carteira_convenio, imagens_data[:carteira_convenio], "carteira_convenio_#{conversa_id}.jpg")
+      attach_base64(medical_request, :documento, imagens_data[:documento], "documento_#{conversa_id}")
+      attach_base64(medical_request, :pedido_medico, imagens_data[:pedido_medico], "pedido_medico_#{conversa_id}")
+      attach_base64(medical_request, :carteira_convenio, imagens_data[:carteira_convenio], "carteira_convenio_#{conversa_id}")
     end
 
     receipt.update!(status: 'processed', processed_at: Time.current)
@@ -107,7 +107,7 @@ class ProcessWebhookJob < ApplicationJob
     return if base64_string.blank? || base64_string.length < 50 # Ignore invalid/placeholder strings
 
     if base64_string.start_with?('data:')
-      # Format is data:image/jpeg;base64,...
+      # Format is data:image/jpeg;base64,... ou data:application/pdf;base64,...
       match = base64_string.match(/^data:([^;]+);base64,(.*)$/m)
       return unless match
 
@@ -118,13 +118,16 @@ class ProcessWebhookJob < ApplicationJob
       base64_data = base64_string
     end
 
+    ext = content_type == 'application/pdf' ? '.pdf' : '.jpg'
+    final_filename = "#{filename}#{ext}"
+
     begin
       decoded_data = Base64.decode64(base64_data)
       io = StringIO.new(decoded_data)
       
       record.public_send(attachment_name).attach(
         io: io,
-        filename: filename,
+        filename: final_filename,
         content_type: content_type
       )
     rescue => e

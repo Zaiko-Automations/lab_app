@@ -64,7 +64,8 @@ class SendCallbackWebhookJob < ApplicationJob
     
     http_request.body = payload.to_json
 
-    Rails.logger.info "Sending outbound webhook callback for MedicalRequest ##{medical_request_id} to #{uri}"
+    Rails.logger.info "[Webhook Callback] Sending outbound webhook callback for MedicalRequest ##{medical_request_id} to #{uri}"
+    Rails.logger.info "[Webhook Callback] Payload: #{payload.to_json}"
     
     response = http.request(http_request)
 

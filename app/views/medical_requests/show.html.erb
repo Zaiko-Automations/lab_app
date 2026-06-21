@@ -51,8 +51,8 @@
   <!-- Main Container: Side-by-Side -->
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start flex-grow">
     
-    <!-- LEFT PANEL: Image Viewer (lg:col-span-5) -->
-    <div class="lg:col-span-5 flex flex-col gap-4 sticky top-24">
+    <!-- LEFT PANEL: Image Viewer (lg:col-span-6) -->
+    <div class="lg:col-span-6 flex flex-col gap-4 sticky top-24">
       <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4">
         <h3 class="text-sm font-bold text-slate-800 font-heading mb-3 uppercase tracking-wide">Documentos Recebidos</h3>
         
@@ -90,12 +90,19 @@
         </div>
 
         <!-- Viewer Area -->
-        <div class="mt-4 relative bg-slate-900 border border-slate-800 rounded-xl overflow-hidden h-[550px] flex items-center justify-center group">
+        <div class="mt-4 relative bg-slate-900 border border-slate-800 rounded-xl overflow-hidden h-[680px] flex items-center justify-center group" id="viewer-container">
           <!-- Image Zoom Container -->
-          <div id="image-zoom-box" class="origin-center transition-all cursor-grab active:cursor-grabbing w-full h-full flex items-center justify-center" style="transform: scale(1) translate(0px, 0px);">
-            <!-- Dynamic Images -->
+          <div id="image-zoom-box" class="origin-center transition-all cursor-grab active:cursor-grabbing w-full h-full flex items-center justify-center relative" style="transform: scale(1.8) translate(0px, 0px);">
+            <!-- Drawing Canvas Overlay -->
+            <canvas id="drawing-canvas" class="absolute top-0 left-0 w-full h-full pointer-events-none z-10 hidden"></canvas>
+
+            <!-- Dynamic Images / PDFs -->
             <% if @medical_request.pedido_medico.attached? %>
-              <img id="img-pedido_medico" src="<%= url_for(@medical_request.pedido_medico) %>" class="max-h-[530px] max-w-full object-contain pointer-events-none select-none hidden">
+              <% if @medical_request.pedido_medico.content_type == 'application/pdf' %>
+                <iframe id="img-pedido_medico" src="<%= url_for(@medical_request.pedido_medico) %>" class="w-full h-full hidden border-none bg-white"></iframe>
+              <% else %>
+                <img id="img-pedido_medico" src="<%= url_for(@medical_request.pedido_medico) %>" class="max-h-[660px] max-w-full object-contain pointer-events-none select-none hidden">
+              <% end %>
             <% else %>
               <div id="img-pedido_medico" class="text-slate-500 text-sm hidden p-6 text-center">
                 <svg class="w-12 h-12 mx-auto mb-2 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -106,40 +113,64 @@
             <% end %>
 
             <% if @medical_request.documento.attached? %>
-              <img id="img-documento" src="<%= url_for(@medical_request.documento) %>" class="max-h-[530px] max-w-full object-contain pointer-events-none select-none hidden">
+              <% if @medical_request.documento.content_type == 'application/pdf' %>
+                <iframe id="img-documento" src="<%= url_for(@medical_request.documento) %>" class="w-full h-full hidden border-none bg-white"></iframe>
+              <% else %>
+                <img id="img-documento" src="<%= url_for(@medical_request.documento) %>" class="max-h-[660px] max-w-full object-contain pointer-events-none select-none hidden">
+              <% end %>
             <% else %>
               <div id="img-documento" class="text-slate-500 text-sm hidden p-6 text-center">
                 <svg class="w-12 h-12 mx-auto mb-2 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
-                Nenhum Documento de Identificação (RG/CNH) anexado pela IA.
+                Nenhum Documento anexado pela IA.
               </div>
             <% end %>
 
             <% if @medical_request.carteira_convenio.attached? %>
-              <img id="img-carteira_convenio" src="<%= url_for(@medical_request.carteira_convenio) %>" class="max-h-[530px] max-w-full object-contain pointer-events-none select-none hidden">
+              <% if @medical_request.carteira_convenio.content_type == 'application/pdf' %>
+                <iframe id="img-carteira_convenio" src="<%= url_for(@medical_request.carteira_convenio) %>" class="w-full h-full hidden border-none bg-white"></iframe>
+              <% else %>
+                <img id="img-carteira_convenio" src="<%= url_for(@medical_request.carteira_convenio) %>" class="max-h-[660px] max-w-full object-contain pointer-events-none select-none hidden">
+              <% end %>
             <% else %>
               <div id="img-carteira_convenio" class="text-slate-500 text-sm hidden p-6 text-center">
                 <svg class="w-12 h-12 mx-auto mb-2 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
-                Nenhuma Carteirinha de Convênio anexada pela IA.
+                Nenhuma Carteirinha anexada pela IA.
               </div>
             <% end %>
           </div>
 
-          <!-- Zoom UI Controls -->
-          <div class="absolute bottom-4 left-4 flex bg-slate-800/90 text-white rounded-lg p-1 border border-slate-700 shadow-md backdrop-blur-sm gap-1">
-            <button type="button" onclick="adjustZoom(0.2)" class="w-8 h-8 rounded hover:bg-slate-700 font-bold transition-all text-sm flex items-center justify-center cursor-pointer" title="Aumentar Zoom">+</button>
-            <button type="button" onclick="adjustZoom(-0.2)" class="w-8 h-8 rounded hover:bg-slate-700 font-bold transition-all text-sm flex items-center justify-center cursor-pointer" title="Diminuir Zoom">-</button>
-            <button type="button" onclick="resetViewer()" class="px-2 h-8 rounded hover:bg-slate-700 font-semibold transition-all text-xs flex items-center justify-center cursor-pointer" title="Redefinir">Recentralizar</button>
+          <!-- UI Controls -->
+          <div class="absolute bottom-4 left-4 flex flex-col gap-2 z-20">
+            <!-- Drawing Toolbar -->
+            <div id="draw-toolbar" class="flex bg-slate-800/90 text-white rounded-lg p-1 border border-slate-700 shadow-md backdrop-blur-sm gap-1 items-center">
+              <button type="button" onclick="toggleDrawMode()" id="btn-draw" class="w-8 h-8 rounded hover:bg-slate-700 transition-all text-sm flex items-center justify-center cursor-pointer" title="Modo Anotação">🖍️</button>
+              <div class="w-px h-5 bg-slate-600 mx-1"></div>
+              <button type="button" onclick="setDrawColor('#ff0000')" class="w-5 h-5 rounded-full bg-red-500 ring-2 ring-transparent ring-offset-1 ring-offset-slate-800 hover:scale-110 cursor-pointer transition-all draw-color" title="Vermelho"></button>
+              <button type="button" onclick="setDrawColor('#00ff00')" class="w-5 h-5 rounded-full bg-green-500 ring-2 ring-transparent ring-offset-1 ring-offset-slate-800 hover:scale-110 cursor-pointer transition-all draw-color" title="Verde"></button>
+              <button type="button" onclick="setDrawColor('#0088ff')" class="w-5 h-5 rounded-full bg-blue-500 ring-2 ring-transparent ring-offset-1 ring-offset-slate-800 hover:scale-110 cursor-pointer transition-all draw-color" title="Azul"></button>
+              <button type="button" onclick="setDrawColor('#ffff00')" class="w-5 h-5 rounded-full bg-yellow-400 ring-2 ring-transparent ring-offset-1 ring-offset-slate-800 hover:scale-110 cursor-pointer transition-all draw-color" title="Amarelo"></button>
+              <button type="button" onclick="setDrawColor('#ffffff')" class="w-5 h-5 rounded-full bg-white ring-2 ring-transparent ring-offset-1 ring-offset-slate-800 hover:scale-110 cursor-pointer transition-all draw-color ring-slate-400" title="Branco"></button>
+              <div class="w-px h-5 bg-slate-600 mx-1"></div>
+              <button type="button" onclick="clearDraw()" class="px-2 h-8 rounded hover:bg-slate-700 font-semibold transition-all text-xs flex items-center justify-center cursor-pointer" title="Apagar Desenhos">Limpar</button>
+            </div>
+
+            <!-- Zoom Toolbar -->
+            <div class="flex bg-slate-800/90 text-white rounded-lg p-1 border border-slate-700 shadow-md backdrop-blur-sm gap-1">
+              <button type="button" onclick="adjustZoom(0.2)" class="w-8 h-8 rounded hover:bg-slate-700 font-bold transition-all text-sm flex items-center justify-center cursor-pointer" title="Aumentar Zoom">+</button>
+              <button type="button" onclick="adjustZoom(-0.2)" class="w-8 h-8 rounded hover:bg-slate-700 font-bold transition-all text-sm flex items-center justify-center cursor-pointer" title="Diminuir Zoom">-</button>
+              <button type="button" onclick="resetViewer()" class="px-2 h-8 rounded hover:bg-slate-700 font-semibold transition-all text-xs flex items-center justify-center cursor-pointer" title="Redefinir">Recentralizar</button>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- RIGHT PANEL: Verification Form (lg:col-span-7) -->
-    <div class="lg:col-span-7">
+    <!-- RIGHT PANEL: Verification Form (lg:col-span-6) -->
+    <div class="lg:col-span-6">
       <%= form_for(@medical_request, url: validate_medical_request_path(@medical_request), method: :post, html: { id: "validation-form", class: "bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden" }) do |f| %>
         
         <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
@@ -445,16 +476,39 @@
     examIndex++;
   }
 
-  // Interactive Document Image Viewer Script (Zoom / Pan)
+  // Interactive Document Image Viewer Script (Zoom / Pan / Draw)
   let currentDoc = '';
-  let zoomScale = 1;
+  let zoomScale = 1.8;
   let zoomX = 0;
   let zoomY = 0;
   let isDragging = false;
   let startX = 0;
   let startY = 0;
 
+  // Draw State
+  let drawMode = false;
+  let isDrawing = false;
+  let currentColor = '#ff0000'; // Default red
+  let context = null;
+
   const zoomBox = document.getElementById('image-zoom-box');
+  const canvas = document.getElementById('drawing-canvas');
+  const drawToolbar = document.getElementById('draw-toolbar');
+  
+  if (canvas) {
+    context = canvas.getContext('2d');
+    
+    // Resize canvas to match its container exactly
+    function resizeCanvas() {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+      context.lineWidth = 3;
+      context.lineCap = 'round';
+      context.lineJoin = 'round';
+    }
+    window.addEventListener('resize', resizeCanvas);
+    setTimeout(resizeCanvas, 100);
+  }
 
   // Select between document tabs
   function selectImage(docType) {
@@ -474,7 +528,18 @@
     const activeImg = document.getElementById('img-' + docType);
     const activeTab = document.getElementById('tab-' + docType);
     
-    if (activeImg) activeImg.classList.remove('hidden');
+    if (activeImg) {
+      activeImg.classList.remove('hidden');
+      
+      // If PDF, disable drawing mode entirely
+      if (activeImg.tagName.toLowerCase() === 'iframe') {
+        drawToolbar.classList.add('hidden');
+        if (drawMode) toggleDrawMode(); // turn it off
+      } else {
+        drawToolbar.classList.remove('hidden');
+      }
+    }
+
     if (activeTab) {
       activeTab.classList.add('bg-primary', 'text-white', 'border-primary');
       activeTab.classList.remove('bg-white', 'text-slate-600', 'border-slate-200');
@@ -497,14 +562,82 @@
   }
 
   function resetViewer() {
-    zoomScale = 1;
+    zoomScale = 1.8;
     zoomX = 0;
     zoomY = 0;
     updateTransform();
   }
 
-  // Drag and Pan (mousedown -> mousemove -> mouseup)
+  // -------------------------
+  // DRAWING CONTROLS
+  // -------------------------
+  function toggleDrawMode() {
+    drawMode = !drawMode;
+    const btnDraw = document.getElementById('btn-draw');
+    
+    if (drawMode) {
+      btnDraw.classList.add('bg-secondary', 'ring-2', 'ring-offset-2', 'ring-offset-slate-800');
+      canvas.classList.remove('pointer-events-none', 'hidden');
+      canvas.style.cursor = 'crosshair';
+      zoomBox.parentElement.style.cursor = 'crosshair';
+    } else {
+      btnDraw.classList.remove('bg-secondary', 'ring-2', 'ring-offset-2', 'ring-offset-slate-800');
+      canvas.classList.add('pointer-events-none');
+      zoomBox.parentElement.style.cursor = 'default';
+    }
+  }
+
+  function setDrawColor(color) {
+    currentColor = color;
+    if (!drawMode) toggleDrawMode(); // Auto-enable if color picked
+  }
+
+  function clearDraw() {
+    if (context && canvas) {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+
+  // Canvas Mouse Events
+  if (canvas) {
+    canvas.addEventListener('mousedown', (e) => {
+      if (!drawMode) return;
+      isDrawing = true;
+      const rect = canvas.getBoundingClientRect();
+      // Adjust coordinates based on zoom scale to map correctly
+      const x = (e.clientX - rect.left) / zoomScale;
+      const y = (e.clientY - rect.top) / zoomScale;
+      
+      context.beginPath();
+      context.moveTo(x, y);
+      e.stopPropagation(); // prevent pan
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      if (!drawMode || !isDrawing) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / zoomScale;
+      const y = (e.clientY - rect.top) / zoomScale;
+      
+      context.strokeStyle = currentColor;
+      context.lineTo(x, y);
+      context.stroke();
+      e.stopPropagation();
+    });
+
+    canvas.addEventListener('mouseup', () => { isDrawing = false; });
+    canvas.addEventListener('mouseleave', () => { isDrawing = false; });
+  }
+
+  // -------------------------
+  // PANNING CONTROLS
+  // -------------------------
   zoomBox.parentElement.addEventListener('mousedown', (e) => {
+    if (drawMode) return; // don't pan if drawing
+    
+    // Ignore if clicking on iframe
+    if (e.target.tagName.toLowerCase() === 'iframe') return;
+
     isDragging = true;
     startX = e.clientX - zoomX;
     startY = e.clientY - zoomY;
@@ -512,7 +645,7 @@
   });
 
   document.addEventListener('mousemove', (e) => {
-    if (!isDragging) return;
+    if (!isDragging || drawMode) return;
     zoomX = e.clientX - startX;
     zoomY = e.clientY - startY;
     updateTransform();

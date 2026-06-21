@@ -34,6 +34,7 @@ class MedicalRequestsController < ApplicationController
         )
 
         # Enqueue background webhook callback
+        Rails.logger.info "[Webhook Callback] Enqueueing SendCallbackWebhookJob for Request ##{@medical_request.id} with validator #{current_user.email}"
         SendCallbackWebhookJob.perform_later(@medical_request.id, changes, current_user.email)
 
         redirect_to root_path(status: 'pending'), notice: "Pedido de #{@medical_request.patient.nome} verificado e validado com sucesso!"
