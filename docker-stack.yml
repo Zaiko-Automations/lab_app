@@ -53,6 +53,7 @@ services:
 
         # Healthcheck via /up
         - "traefik.http.services.labapp.loadbalancer.healthcheck.path=/up"
+        - "traefik.http.services.labapp.loadbalancer.healthcheck.scheme=http"
         - "traefik.http.services.labapp.loadbalancer.healthcheck.interval=10s"
 
   db:
