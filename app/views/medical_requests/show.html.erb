@@ -578,6 +578,7 @@
     if (drawMode) {
       btnDraw.classList.add('bg-secondary', 'ring-2', 'ring-offset-2', 'ring-offset-slate-800');
       canvas.classList.remove('pointer-events-none', 'hidden');
+      resizeCanvas(); // Força recálculo do tamanho pois antes estava display:none
       canvas.style.cursor = 'crosshair';
       zoomBox.parentElement.style.cursor = 'crosshair';
     } else {
