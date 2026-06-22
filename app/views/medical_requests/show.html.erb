@@ -90,18 +90,18 @@
         </div>
 
         <!-- Viewer Area -->
-        <div class="mt-4 relative bg-slate-900 border border-slate-800 rounded-xl overflow-hidden h-[680px] flex items-center justify-center group" id="viewer-container">
+        <div class="mt-4 bg-slate-900 border border-slate-800 rounded-xl overflow-hidden h-[800px] flex items-center justify-center group relative" id="viewer-container">
           <!-- Image Zoom Container -->
-          <div id="image-zoom-box" class="origin-center transition-all cursor-grab active:cursor-grabbing w-full h-full flex items-center justify-center relative" style="transform: scale(1.8) translate(0px, 0px);">
+          <div id="image-zoom-box" class="origin-center transition-all cursor-grab active:cursor-grabbing w-full h-full flex items-center justify-center relative" style="transform: scale(1.6) translate(0px, 0px);">
             <!-- Drawing Canvas Overlay -->
             <canvas id="drawing-canvas" class="absolute top-0 left-0 w-full h-full pointer-events-none z-10 hidden"></canvas>
 
             <!-- Dynamic Images / PDFs -->
             <% if @medical_request.pedido_medico.attached? %>
               <% if @medical_request.pedido_medico.content_type == 'application/pdf' %>
-                <iframe id="img-pedido_medico" src="<%= url_for(@medical_request.pedido_medico) %>" class="w-full h-full hidden border-none bg-white"></iframe>
+                <iframe id="img-pedido_medico" src="<%= url_for(@medical_request.pedido_medico) %>" class="w-full h-full hidden border-none bg-white relative z-0"></iframe>
               <% else %>
-                <img id="img-pedido_medico" src="<%= url_for(@medical_request.pedido_medico) %>" class="max-h-[660px] max-w-full object-contain pointer-events-none select-none hidden">
+                <img id="img-pedido_medico" src="<%= url_for(@medical_request.pedido_medico) %>" class="max-h-[780px] max-w-full object-contain pointer-events-none select-none hidden relative z-0">
               <% end %>
             <% else %>
               <div id="img-pedido_medico" class="text-slate-500 text-sm hidden p-6 text-center">
@@ -114,9 +114,9 @@
 
             <% if @medical_request.documento.attached? %>
               <% if @medical_request.documento.content_type == 'application/pdf' %>
-                <iframe id="img-documento" src="<%= url_for(@medical_request.documento) %>" class="w-full h-full hidden border-none bg-white"></iframe>
+                <iframe id="img-documento" src="<%= url_for(@medical_request.documento) %>" class="w-full h-full hidden border-none bg-white relative z-0"></iframe>
               <% else %>
-                <img id="img-documento" src="<%= url_for(@medical_request.documento) %>" class="max-h-[660px] max-w-full object-contain pointer-events-none select-none hidden">
+                <img id="img-documento" src="<%= url_for(@medical_request.documento) %>" class="max-h-[780px] max-w-full object-contain pointer-events-none select-none hidden relative z-0">
               <% end %>
             <% else %>
               <div id="img-documento" class="text-slate-500 text-sm hidden p-6 text-center">
@@ -129,9 +129,9 @@
 
             <% if @medical_request.carteira_convenio.attached? %>
               <% if @medical_request.carteira_convenio.content_type == 'application/pdf' %>
-                <iframe id="img-carteira_convenio" src="<%= url_for(@medical_request.carteira_convenio) %>" class="w-full h-full hidden border-none bg-white"></iframe>
+                <iframe id="img-carteira_convenio" src="<%= url_for(@medical_request.carteira_convenio) %>" class="w-full h-full hidden border-none bg-white relative z-0"></iframe>
               <% else %>
-                <img id="img-carteira_convenio" src="<%= url_for(@medical_request.carteira_convenio) %>" class="max-h-[660px] max-w-full object-contain pointer-events-none select-none hidden">
+                <img id="img-carteira_convenio" src="<%= url_for(@medical_request.carteira_convenio) %>" class="max-h-[780px] max-w-full object-contain pointer-events-none select-none hidden relative z-0">
               <% end %>
             <% else %>
               <div id="img-carteira_convenio" class="text-slate-500 text-sm hidden p-6 text-center">
@@ -142,28 +142,28 @@
               </div>
             <% end %>
           </div>
+        </div>
 
-          <!-- UI Controls -->
-          <div class="absolute bottom-4 left-4 flex flex-col gap-2 z-20">
-            <!-- Drawing Toolbar -->
-            <div id="draw-toolbar" class="flex bg-slate-800/90 text-white rounded-lg p-1 border border-slate-700 shadow-md backdrop-blur-sm gap-1 items-center">
-              <button type="button" onclick="toggleDrawMode()" id="btn-draw" class="w-8 h-8 rounded hover:bg-slate-700 transition-all text-sm flex items-center justify-center cursor-pointer" title="Modo Anotação">🖍️</button>
-              <div class="w-px h-5 bg-slate-600 mx-1"></div>
-              <button type="button" onclick="setDrawColor('#ff0000')" class="w-5 h-5 rounded-full bg-red-500 ring-2 ring-transparent ring-offset-1 ring-offset-slate-800 hover:scale-110 cursor-pointer transition-all draw-color" title="Vermelho"></button>
-              <button type="button" onclick="setDrawColor('#00ff00')" class="w-5 h-5 rounded-full bg-green-500 ring-2 ring-transparent ring-offset-1 ring-offset-slate-800 hover:scale-110 cursor-pointer transition-all draw-color" title="Verde"></button>
-              <button type="button" onclick="setDrawColor('#0088ff')" class="w-5 h-5 rounded-full bg-blue-500 ring-2 ring-transparent ring-offset-1 ring-offset-slate-800 hover:scale-110 cursor-pointer transition-all draw-color" title="Azul"></button>
-              <button type="button" onclick="setDrawColor('#ffff00')" class="w-5 h-5 rounded-full bg-yellow-400 ring-2 ring-transparent ring-offset-1 ring-offset-slate-800 hover:scale-110 cursor-pointer transition-all draw-color" title="Amarelo"></button>
-              <button type="button" onclick="setDrawColor('#ffffff')" class="w-5 h-5 rounded-full bg-white ring-2 ring-transparent ring-offset-1 ring-offset-slate-800 hover:scale-110 cursor-pointer transition-all draw-color ring-slate-400" title="Branco"></button>
-              <div class="w-px h-5 bg-slate-600 mx-1"></div>
-              <button type="button" onclick="clearDraw()" class="px-2 h-8 rounded hover:bg-slate-700 font-semibold transition-all text-xs flex items-center justify-center cursor-pointer" title="Apagar Desenhos">Limpar</button>
-            </div>
+        <!-- UI Controls (Moved below the image) -->
+        <div class="mt-3 flex flex-wrap gap-2 items-center justify-between">
+          <!-- Drawing Toolbar -->
+          <div id="draw-toolbar" class="flex bg-slate-800 text-white rounded-lg p-1 border border-slate-700 shadow-sm gap-1 items-center">
+            <button type="button" onclick="toggleDrawMode()" id="btn-draw" class="w-8 h-8 rounded hover:bg-slate-700 transition-all text-sm flex items-center justify-center cursor-pointer" title="Modo Anotação">🖍️</button>
+            <div class="w-px h-5 bg-slate-600 mx-1"></div>
+            <button type="button" onclick="setDrawColor('#ff0000')" class="w-5 h-5 rounded-full bg-red-500 ring-2 ring-transparent ring-offset-1 ring-offset-slate-800 hover:scale-110 cursor-pointer transition-all draw-color" title="Vermelho"></button>
+            <button type="button" onclick="setDrawColor('#00ff00')" class="w-5 h-5 rounded-full bg-green-500 ring-2 ring-transparent ring-offset-1 ring-offset-slate-800 hover:scale-110 cursor-pointer transition-all draw-color" title="Verde"></button>
+            <button type="button" onclick="setDrawColor('#0088ff')" class="w-5 h-5 rounded-full bg-blue-500 ring-2 ring-transparent ring-offset-1 ring-offset-slate-800 hover:scale-110 cursor-pointer transition-all draw-color" title="Azul"></button>
+            <button type="button" onclick="setDrawColor('#ffff00')" class="w-5 h-5 rounded-full bg-yellow-400 ring-2 ring-transparent ring-offset-1 ring-offset-slate-800 hover:scale-110 cursor-pointer transition-all draw-color" title="Amarelo"></button>
+            <button type="button" onclick="setDrawColor('#ffffff')" class="w-5 h-5 rounded-full bg-white ring-2 ring-transparent ring-offset-1 ring-offset-slate-800 hover:scale-110 cursor-pointer transition-all draw-color ring-slate-400" title="Branco"></button>
+            <div class="w-px h-5 bg-slate-600 mx-1"></div>
+            <button type="button" onclick="clearDraw()" class="px-2 h-8 rounded hover:bg-slate-700 font-semibold transition-all text-xs flex items-center justify-center cursor-pointer" title="Apagar Desenhos">Limpar</button>
+          </div>
 
-            <!-- Zoom Toolbar -->
-            <div class="flex bg-slate-800/90 text-white rounded-lg p-1 border border-slate-700 shadow-md backdrop-blur-sm gap-1">
-              <button type="button" onclick="adjustZoom(0.2)" class="w-8 h-8 rounded hover:bg-slate-700 font-bold transition-all text-sm flex items-center justify-center cursor-pointer" title="Aumentar Zoom">+</button>
-              <button type="button" onclick="adjustZoom(-0.2)" class="w-8 h-8 rounded hover:bg-slate-700 font-bold transition-all text-sm flex items-center justify-center cursor-pointer" title="Diminuir Zoom">-</button>
-              <button type="button" onclick="resetViewer()" class="px-2 h-8 rounded hover:bg-slate-700 font-semibold transition-all text-xs flex items-center justify-center cursor-pointer" title="Redefinir">Recentralizar</button>
-            </div>
+          <!-- Zoom Toolbar -->
+          <div class="flex bg-slate-800 text-white rounded-lg p-1 border border-slate-700 shadow-sm gap-1">
+            <button type="button" onclick="adjustZoom(0.2)" class="w-8 h-8 rounded hover:bg-slate-700 font-bold transition-all text-sm flex items-center justify-center cursor-pointer" title="Aumentar Zoom">+</button>
+            <button type="button" onclick="adjustZoom(-0.2)" class="w-8 h-8 rounded hover:bg-slate-700 font-bold transition-all text-sm flex items-center justify-center cursor-pointer" title="Diminuir Zoom">-</button>
+            <button type="button" onclick="resetViewer()" class="px-2 h-8 rounded hover:bg-slate-700 font-semibold transition-all text-xs flex items-center justify-center cursor-pointer" title="Redefinir">Recentralizar</button>
           </div>
         </div>
       </div>
@@ -478,7 +478,7 @@
 
   // Interactive Document Image Viewer Script (Zoom / Pan / Draw)
   let currentDoc = '';
-  let zoomScale = 1.8;
+  let zoomScale = 1.6;
   let zoomX = 0;
   let zoomY = 0;
   let isDragging = false;
@@ -562,7 +562,7 @@
   }
 
   function resetViewer() {
-    zoomScale = 1.8;
+    zoomScale = 1.6;
     zoomX = 0;
     zoomY = 0;
     updateTransform();
@@ -604,9 +604,16 @@
       if (!drawMode) return;
       isDrawing = true;
       const rect = canvas.getBoundingClientRect();
-      // Adjust coordinates based on zoom scale to map correctly
-      const x = (e.clientX - rect.left) / zoomScale;
-      const y = (e.clientY - rect.top) / zoomScale;
+      
+      // Quando redimensionamos/damos zoom, o CSS do elemento pai manipula o scale.
+      // Precisamos normalizar a coordenada X/Y para o canvas ignorando a escala CSS, pois
+      // o mouseEvent.clientX/Y está relativo à viewport e o rect à tela escalada.
+      // E precisamos desenhar na resolução lógica do Canvas
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+
+      const x = (e.clientX - rect.left) * scaleX;
+      const y = (e.clientY - rect.top) * scaleY;
       
       context.beginPath();
       context.moveTo(x, y);
@@ -616,8 +623,12 @@
     canvas.addEventListener('mousemove', (e) => {
       if (!drawMode || !isDrawing) return;
       const rect = canvas.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / zoomScale;
-      const y = (e.clientY - rect.top) / zoomScale;
+      
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+
+      const x = (e.clientX - rect.left) * scaleX;
+      const y = (e.clientY - rect.top) * scaleY;
       
       context.strokeStyle = currentColor;
       context.lineTo(x, y);
