@@ -92,17 +92,13 @@
         <!-- Viewer Area -->
         <div class="mt-4 bg-slate-900 border border-slate-800 rounded-xl overflow-hidden h-[800px] flex items-center justify-center group relative" id="viewer-container">
           <!-- Image Zoom Container -->
-          <div id="image-zoom-box" class="origin-center transition-all cursor-grab active:cursor-grabbing w-full h-full flex items-center justify-center relative" style="transform: scale(1.6) translate(0px, 0px);">
+          <div id="image-zoom-box" class="origin-center transition-all cursor-grab active:cursor-grabbing w-full h-full flex items-center justify-center relative" style="transform: scale(1.0) translate(0px, 0px);">
             <!-- Drawing Canvas Overlay -->
             <canvas id="drawing-canvas" class="absolute top-0 left-0 w-full h-full pointer-events-none z-10 hidden"></canvas>
 
-            <!-- Dynamic Images / PDFs -->
+            <!-- Dynamic Images -->
             <% if @medical_request.pedido_medico.attached? %>
-              <% if @medical_request.pedido_medico.content_type == 'application/pdf' %>
-                <iframe id="img-pedido_medico" src="<%= url_for(@medical_request.pedido_medico) %>" class="w-full h-full hidden border-none bg-white relative z-0"></iframe>
-              <% else %>
-                <img id="img-pedido_medico" src="<%= url_for(@medical_request.pedido_medico) %>" class="max-h-[780px] max-w-full object-contain pointer-events-none select-none hidden relative z-0">
-              <% end %>
+              <img id="img-pedido_medico" src="<%= url_for(@medical_request.pedido_medico) %>" class="max-h-[780px] max-w-full object-contain pointer-events-none select-none relative z-0">
             <% else %>
               <div id="img-pedido_medico" class="text-slate-500 text-sm hidden p-6 text-center">
                 <svg class="w-12 h-12 mx-auto mb-2 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -113,11 +109,7 @@
             <% end %>
 
             <% if @medical_request.documento.attached? %>
-              <% if @medical_request.documento.content_type == 'application/pdf' %>
-                <iframe id="img-documento" src="<%= url_for(@medical_request.documento) %>" class="w-full h-full hidden border-none bg-white relative z-0"></iframe>
-              <% else %>
-                <img id="img-documento" src="<%= url_for(@medical_request.documento) %>" class="max-h-[780px] max-w-full object-contain pointer-events-none select-none hidden relative z-0">
-              <% end %>
+              <img id="img-documento" src="<%= url_for(@medical_request.documento) %>" class="max-h-[780px] max-w-full object-contain pointer-events-none select-none hidden relative z-0">
             <% else %>
               <div id="img-documento" class="text-slate-500 text-sm hidden p-6 text-center">
                 <svg class="w-12 h-12 mx-auto mb-2 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -128,11 +120,7 @@
             <% end %>
 
             <% if @medical_request.carteira_convenio.attached? %>
-              <% if @medical_request.carteira_convenio.content_type == 'application/pdf' %>
-                <iframe id="img-carteira_convenio" src="<%= url_for(@medical_request.carteira_convenio) %>" class="w-full h-full hidden border-none bg-white relative z-0"></iframe>
-              <% else %>
-                <img id="img-carteira_convenio" src="<%= url_for(@medical_request.carteira_convenio) %>" class="max-h-[780px] max-w-full object-contain pointer-events-none select-none hidden relative z-0">
-              <% end %>
+              <img id="img-carteira_convenio" src="<%= url_for(@medical_request.carteira_convenio) %>" class="max-h-[780px] max-w-full object-contain pointer-events-none select-none hidden relative z-0">
             <% else %>
               <div id="img-carteira_convenio" class="text-slate-500 text-sm hidden p-6 text-center">
                 <svg class="w-12 h-12 mx-auto mb-2 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -178,8 +166,12 @@
             <h3 class="text-base font-bold text-primary font-heading">Formulário de Validação de Dados</h3>
             <p class="text-xs text-slate-500">Corrija os dados se houver erros de leitura pela IA.</p>
           </div>
-          <div class="text-xs text-slate-400 font-mono">
-            Sessão: <%= @medical_request.conversation_id %>
+          <div>
+            <% if @medical_request.link_conversa.present? %>
+              <%= link_to "Abrir Conversa", @medical_request.link_conversa, target: "_blank", class: "inline-flex items-center justify-center px-4 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-lg text-sm font-bold hover:bg-emerald-100 transition-colors shadow-sm" %>
+            <% else %>
+              <span class="text-xs text-slate-400 font-mono">Sem link</span>
+            <% end %>
           </div>
         </div>
 
@@ -398,7 +390,7 @@
             <div class="space-y-3" id="exams-container">
               <%= f.fields_for :requested_exams do |exam_f| %>
                 <div class="flex items-center gap-3 exam-item bg-slate-50 p-3 rounded-lg border border-slate-200 shadow-sm">
-                  <div class="w-1/4">
+                  <div class="w-2/12">
                     <%= exam_f.label :codigo, "Código", class: "block text-[10px] font-bold text-slate-500 uppercase mb-1" %>
                     <%= exam_f.text_field :codigo, disabled: is_readonly, class: "w-full px-2.5 py-1.5 border border-slate-300 rounded-md focus:ring-1 focus:ring-secondary text-xs" %>
                   </div>
@@ -406,10 +398,14 @@
                     <%= exam_f.label :descricao, "Descrição do Exame", class: "block text-[10px] font-bold text-slate-500 uppercase mb-1" %>
                     <%= exam_f.text_field :descricao, disabled: is_readonly, class: "w-full px-2.5 py-1.5 border border-slate-300 rounded-md focus:ring-1 focus:ring-secondary text-xs" %>
                   </div>
+                  <div class="w-2/12">
+                    <%= exam_f.label :acuracia, "Acurácia", class: "block text-[10px] font-bold text-slate-500 uppercase mb-1" %>
+                    <%= exam_f.text_field :acuracia, disabled: is_readonly, class: "w-full px-2.5 py-1.5 border border-slate-300 rounded-md focus:ring-1 focus:ring-secondary text-xs text-center font-mono text-emerald-600 bg-emerald-50", placeholder: "Ex: 95%" %>
+                  </div>
                   <% unless is_readonly %>
-                    <div class="pt-4">
+                    <div class="pt-4 w-16 text-center">
                       <%= exam_f.check_box :_destroy, class: "h-4 w-4 text-red-500 rounded border-slate-300 focus:ring-red-400 cursor-pointer" %>
-                      <%= exam_f.label :_destroy, "Remover", class: "text-xs text-red-600 font-medium ml-1 cursor-pointer" %>
+                      <%= exam_f.label :_destroy, "Remover", class: "text-[10px] text-red-600 font-bold block mt-0.5 cursor-pointer" %>
                     </div>
                   <% end %>
                 </div>
@@ -448,10 +444,9 @@
   </div>
 </div>
 
-<!-- Dynamic Template for Adding Exams (Rails style) -->
 <template id="exam-template">
   <div class="flex items-center gap-3 exam-item bg-slate-50 p-3 rounded-lg border border-slate-200 shadow-sm mt-3 animate-fade-in">
-    <div class="w-1/4">
+    <div class="w-2/12">
       <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Código</label>
       <input type="text" name="medical_request[requested_exams_attributes][NEW_INDEX][codigo]" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-md focus:ring-1 focus:ring-secondary text-xs">
     </div>
@@ -459,7 +454,11 @@
       <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Descrição do Exame</label>
       <input type="text" name="medical_request[requested_exams_attributes][NEW_INDEX][descricao]" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-md focus:ring-1 focus:ring-secondary text-xs">
     </div>
-    <div class="pt-4 flex items-center">
+    <div class="w-2/12">
+      <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Acurácia</label>
+      <input type="text" name="medical_request[requested_exams_attributes][NEW_INDEX][acuracia]" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-md focus:ring-1 focus:ring-secondary text-xs text-center font-mono text-emerald-600 bg-emerald-50" placeholder="Ex: 95%">
+    </div>
+    <div class="pt-4 w-16 text-center">
       <button type="button" onclick="this.closest('.exam-item').remove()" class="text-xs text-red-600 font-bold hover:text-red-800 transition-colors">Remover</button>
     </div>
   </div>
@@ -478,7 +477,7 @@
 
   // Interactive Document Image Viewer Script (Zoom / Pan / Draw)
   let currentDoc = '';
-  let zoomScale = 1.6;
+  let zoomScale = 1.0;
   let zoomX = 0;
   let zoomY = 0;
   let isDragging = false;
@@ -530,14 +529,7 @@
     
     if (activeImg) {
       activeImg.classList.remove('hidden');
-      
-      // If PDF, disable drawing mode entirely
-      if (activeImg.tagName.toLowerCase() === 'iframe') {
-        drawToolbar.classList.add('hidden');
-        if (drawMode) toggleDrawMode(); // turn it off
-      } else {
-        drawToolbar.classList.remove('hidden');
-      }
+      drawToolbar.classList.remove('hidden');
     }
 
     if (activeTab) {
@@ -562,7 +554,7 @@
   }
 
   function resetViewer() {
-    zoomScale = 1.6;
+    zoomScale = 1.0;
     zoomX = 0;
     zoomY = 0;
     updateTransform();
@@ -639,6 +631,9 @@
 
     canvas.addEventListener('mouseup', () => { isDrawing = false; });
     canvas.addEventListener('mouseleave', () => { isDrawing = false; });
+    
+    // Add global mouse up to stop drawing if user leaves the canvas while pressed
+    document.addEventListener('mouseup', () => { isDrawing = false; });
   }
 
   // -------------------------

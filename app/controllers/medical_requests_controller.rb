@@ -67,7 +67,7 @@ class MedicalRequestsController < ApplicationController
         :id, :nome, :numero_conselho
       ],
       requested_exams_attributes: [
-        :id, :codigo, :descricao, :_destroy
+        :id, :codigo, :descricao, :acuracia, :_destroy
       ]
     )
   end

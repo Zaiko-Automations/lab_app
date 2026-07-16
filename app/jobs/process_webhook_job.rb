@@ -85,7 +85,8 @@ class ProcessWebhookJob < ApplicationJob
         next if exam[:descricao].blank? && exam[:codigo].blank? # Skip empty exams
         medical_request.requested_exams.create!(
           codigo: exam[:codigo],
-          descricao: exam[:descricao]
+          descricao: exam[:descricao],
+          acuracia: exam[:acuracia]
         )
       end
 

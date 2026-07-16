@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_06_20_033016) do
+ActiveRecord::Schema[7.1].define(version: 2026_07_16_030736) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -90,6 +90,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_06_20_033016) do
     t.string "descricao"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "acuracia"
     t.index ["medical_request_id"], name: "index_requested_exams_on_medical_request_id"
   end
 
