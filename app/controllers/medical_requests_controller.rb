@@ -13,6 +13,8 @@ class MedicalRequestsController < ApplicationController
       @medical_requests = @medical_requests.joins(:patient)
         .where("patients.nome LIKE :search OR patients.cpf LIKE :search OR medical_requests.conversation_id LIKE :search", search: search_term)
     end
+
+    @medical_requests = @medical_requests.page(params[:page]).per(params[:per_page].presence || 20)
   end
 
   def show
