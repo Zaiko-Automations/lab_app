@@ -64,7 +64,7 @@
               <tr class="hover:bg-slate-50/50 transition-colors">
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex flex-col">
-                    <span class="text-sm font-bold text-slate-900"><%= request.patient.nome %></span>
+                    <span class="text-sm font-bold text-slate-900"><%= request.patient.nome.to_s.upcase %></span>
                     <span class="text-xs text-slate-500 mt-0.5">CPF: <%= request.patient.cpf.gsub(/(\d{3})(\d{3})(\d{3})(\d{2})/, '\1.\2.\3-\4') rescue request.patient.cpf %></span>
                   </div>
                 </td>
@@ -79,7 +79,7 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-700">
                   <div class="flex flex-col">
-                    <span class="font-bold text-slate-700 uppercase"><%= request.tipo.presence || "ORÇAMENTO" %></span>
+                    <span class="font-bold text-slate-700 uppercase"><%= (request.tipo.presence || "ORÇAMENTO").to_s.upcase.gsub('_', ' ').gsub('CONVENIO', 'CONVÊNIO').gsub('ORCAMENTO', 'ORÇAMENTO') %></span>
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">

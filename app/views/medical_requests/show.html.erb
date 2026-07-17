@@ -151,6 +151,7 @@
           <div class="flex bg-slate-800 text-white rounded-lg p-1 border border-slate-700 shadow-sm gap-1">
             <button type="button" onclick="adjustZoom(0.2)" class="w-8 h-8 rounded hover:bg-slate-700 font-bold transition-all text-sm flex items-center justify-center cursor-pointer" title="Aumentar Zoom">+</button>
             <button type="button" onclick="adjustZoom(-0.2)" class="w-8 h-8 rounded hover:bg-slate-700 font-bold transition-all text-sm flex items-center justify-center cursor-pointer" title="Diminuir Zoom">-</button>
+            <button type="button" onclick="rotateViewer()" class="px-2 h-8 rounded hover:bg-slate-700 font-semibold transition-all text-xs flex items-center justify-center cursor-pointer" title="Girar Imagem">Girar</button>
             <button type="button" onclick="resetViewer()" class="px-2 h-8 rounded hover:bg-slate-700 font-semibold transition-all text-xs flex items-center justify-center cursor-pointer" title="Redefinir">Recentralizar</button>
           </div>
         </div>
@@ -484,6 +485,7 @@
   let zoomScale = 1.0;
   let zoomX = 0;
   let zoomY = 0;
+  let rotationAngle = 0;
   let isDragging = false;
   let startX = 0;
   let startY = 0;
@@ -547,7 +549,7 @@
 
   // Set Zoom
   function updateTransform() {
-    zoomBox.style.transform = `scale(${zoomScale}) translate(${zoomX}px, ${zoomY}px)`;
+    zoomBox.style.transform = `scale(${zoomScale}) translate(${zoomX}px, ${zoomY}px) rotate(${rotationAngle}deg)`;
   }
 
   function adjustZoom(amount) {
@@ -557,10 +559,16 @@
     updateTransform();
   }
 
+  function rotateViewer() {
+    rotationAngle = (rotationAngle + 90) % 360;
+    updateTransform();
+  }
+
   function resetViewer() {
     zoomScale = 1.0;
     zoomX = 0;
     zoomY = 0;
+    rotationAngle = 0;
     updateTransform();
   }
 
