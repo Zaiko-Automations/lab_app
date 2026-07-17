@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_07_16_030736) do
+ActiveRecord::Schema[7.1].define(version: 2026_07_17_025815) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -52,6 +52,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_07_16_030736) do
     t.json "ai_extracted_data"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "especialidade"
     t.index ["conversation_id"], name: "index_medical_requests_on_conversation_id"
     t.index ["patient_id"], name: "index_medical_requests_on_patient_id"
     t.index ["requester_id"], name: "index_medical_requests_on_requester_id"

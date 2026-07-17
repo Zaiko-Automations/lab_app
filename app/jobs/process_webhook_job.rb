@@ -76,6 +76,7 @@ class ProcessWebhookJob < ApplicationJob
         conversation_id: conversa_id,
         link_conversa: link_conversa,
         tipo: tipo,
+        especialidade: payload[:especialidade],
         status: 'pending',
         ai_extracted_data: ai_snapshot
       )

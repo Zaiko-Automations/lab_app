@@ -70,7 +70,7 @@
           
           <button type="button" onclick="selectImage('documento')" id="tab-documento"
                   class="flex-1 text-center py-2 px-3 text-xs font-semibold rounded-lg border transition-all cursor-pointer">
-            RG / CNH
+            Documento
             <% if @medical_request.documento.attached? %>
               <span class="block text-[9px] text-emerald-500 font-normal">Anexo ok</span>
             <% else %>
@@ -90,7 +90,7 @@
         </div>
 
         <!-- Viewer Area -->
-        <div class="mt-4 bg-slate-900 border border-slate-800 rounded-xl overflow-hidden h-[800px] flex items-center justify-center group relative" id="viewer-container">
+        <div class="mt-4 border border-slate-800 rounded-xl overflow-hidden h-[800px] flex items-center justify-center group relative bg-[#002b47]" id="viewer-container">
           <!-- Image Zoom Container -->
           <div id="image-zoom-box" class="origin-center transition-all cursor-grab active:cursor-grabbing w-full h-full flex items-center justify-center relative" style="transform: scale(1.0) translate(0px, 0px);">
             <!-- Drawing Canvas Overlay -->
@@ -162,9 +162,12 @@
       <%= form_for(@medical_request, url: validate_medical_request_path(@medical_request), method: :post, html: { id: "validation-form", class: "bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden" }) do |f| %>
         
         <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-          <div>
+          <div class="flex items-center gap-4">
             <h3 class="text-base font-bold text-primary font-heading">Formulário de Validação de Dados</h3>
-            <p class="text-xs text-slate-500">Corrija os dados se houver erros de leitura pela IA.</p>
+            <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded border border-slate-200">
+              <%= f.label :tipo, "Serviço Solicitado:", class: "text-xs font-bold text-slate-700 whitespace-nowrap" %>
+              <%= f.text_field :tipo, disabled: is_readonly, class: "border-none bg-transparent focus:ring-0 text-sm font-semibold p-0 w-32" %>
+            </div>
           </div>
           <div>
             <% if @medical_request.link_conversa.present? %>
@@ -316,7 +319,7 @@
                 </div>
 
                 <div class="flex flex-col">
-                  <%= p.label :plano_convenio, "Plano do Convênio", class: "text-xs font-bold text-slate-700 mb-1" %>
+                  <%= p.label :plano_convenio, "Tipo de Plano", class: "text-xs font-bold text-slate-700 mb-1" %>
                   <%= p.text_field :plano_convenio, disabled: is_readonly, class: "px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-secondary text-sm shadow-sm" %>
                   <% if ai_patient[:plano_convenio].present? && ai_patient[:plano_convenio] != @medical_request.patient.plano_convenio %>
                     <span class="text-[10px] text-amber-600 bg-amber-50 rounded px-2 mt-1">Original IA: <%= ai_patient[:plano_convenio] %></span>
@@ -344,12 +347,12 @@
 
           <!-- SEÇÃO 3: MÉDICO SOLICITANTE -->
           <div class="space-y-4">
-            <h4 class="text-xs font-bold uppercase tracking-wider text-secondary border-b border-slate-100 pb-2">3. Médico Solicitante</h4>
+            <h4 class="text-xs font-bold uppercase tracking-wider text-secondary border-b border-slate-100 pb-2">3. Dados do Solicitante</h4>
             
             <%= f.fields_for :requester do |r| %>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="flex flex-col">
-                  <%= r.label :nome, "Nome do Médico", class: "text-xs font-bold text-slate-700 mb-1" %>
+                  <%= r.label :nome, "Nome do Profissional", class: "text-xs font-bold text-slate-700 mb-1" %>
                   <%= r.text_field :nome, disabled: is_readonly, class: "px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-secondary text-sm shadow-sm" %>
                   <% if ai_solicitante[:nome].present? && ai_solicitante[:nome] != @medical_request.requester.nome %>
                     <span class="text-[10px] text-amber-600 bg-amber-50 rounded px-2 mt-1">Original IA: <%= ai_solicitante[:nome] %></span>
@@ -357,7 +360,7 @@
                 </div>
 
                 <div class="flex flex-col">
-                  <%= r.label :numero_conselho, "CRM / Número do Conselho", class: "text-xs font-bold text-slate-700 mb-1" %>
+                  <%= r.label :numero_conselho, "Número do Conselho", class: "text-xs font-bold text-slate-700 mb-1" %>
                   <%= r.text_field :numero_conselho, disabled: is_readonly, class: "px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-secondary text-sm shadow-sm" %>
                   <% if ai_solicitante[:numero_conselho].present? && ai_solicitante[:numero_conselho] != @medical_request.requester.numero_conselho %>
                     <span class="text-[10px] text-amber-600 bg-amber-50 rounded px-2 mt-1">Original IA: <%= ai_solicitante[:numero_conselho] %></span>
@@ -377,8 +380,8 @@
                 </div>
               <% end %>
               <div class="flex flex-col">
-                <%= f.label :tipo, "Tipo de Pedido", class: "text-xs font-bold text-slate-700 mb-1" %>
-                <%= f.text_field :tipo, disabled: is_readonly, class: "px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-secondary text-sm shadow-sm" %>
+                <%= f.label :especialidade, "Especialidade", class: "text-xs font-bold text-slate-700 mb-1" %>
+                <%= f.text_field :especialidade, disabled: is_readonly, class: "px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-secondary text-sm shadow-sm" %>
               </div>
             </div>
           </div>
@@ -403,9 +406,12 @@
                     <%= exam_f.text_field :acuracia, disabled: is_readonly, class: "w-full px-2.5 py-1.5 border border-slate-300 rounded-md focus:ring-1 focus:ring-secondary text-xs text-center font-mono text-emerald-600 bg-emerald-50", placeholder: "Ex: 95%" %>
                   </div>
                   <% unless is_readonly %>
-                    <div class="pt-4 w-16 text-center">
-                      <%= exam_f.check_box :_destroy, class: "h-4 w-4 text-red-500 rounded border-slate-300 focus:ring-red-400 cursor-pointer" %>
-                      <%= exam_f.label :_destroy, "Remover", class: "text-[10px] text-red-600 font-bold block mt-0.5 cursor-pointer" %>
+                    <div class="pt-4 w-16 flex items-center justify-center">
+                      <%= exam_f.hidden_field :_destroy, class: "destroy-field" %>
+                      <button type="button" class="text-red-500 hover:text-red-700 hover:bg-red-50 p-1.5 rounded transition-colors flex flex-col items-center gap-0.5" onclick="if(confirm('Deseja mesmo excluir? É uma ação irreversível')) { this.previousElementSibling.value = '1'; this.closest('.exam-item').style.display = 'none'; }">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        <span class="text-[9px] font-bold">Excluir</span>
+                      </button>
                     </div>
                   <% end %>
                 </div>
@@ -424,9 +430,7 @@
         <!-- Footer / Action Buttons -->
         <div class="p-6 border-t border-slate-100 bg-slate-50/80 flex items-center justify-between gap-4">
           <div class="text-xs text-slate-400">
-            <% if @medical_request.pending? %>
-              Clique em "Validar e Confirmar" para enviar os dados para a ZaikoHub.
-            <% else %>
+            <% unless @medical_request.pending? %>
               Este registro já foi processado e enviado.
             <% end %>
           </div>
@@ -434,7 +438,8 @@
           <div class="flex items-center gap-3">
             <%= link_to "Cancelar", root_path, class: "px-4 py-2 text-slate-500 hover:text-slate-700 font-semibold text-sm transition-colors" %>
             <% if @medical_request.pending? %>
-              <%= f.submit "Validar e Confirmar Dados", class: "px-5 py-2.5 bg-secondary hover:bg-secondary-hover text-white text-sm font-bold rounded-xl transition-all shadow-md shadow-secondary/20 cursor-pointer" %>
+              <button type="submit" name="commit" value="Salvar" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white text-sm font-bold rounded-xl transition-all shadow-md cursor-pointer">Salvar</button>
+              <button type="submit" name="commit" value="Validar" data-confirm="Deseja realmente validar e enviar?" class="px-5 py-2.5 bg-secondary hover:bg-secondary-hover text-white text-sm font-bold rounded-xl transition-all shadow-md shadow-secondary/20 cursor-pointer">Validar</button>
             <% end %>
           </div>
         </div>
@@ -454,12 +459,11 @@
       <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Descrição do Exame</label>
       <input type="text" name="medical_request[requested_exams_attributes][NEW_INDEX][descricao]" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-md focus:ring-1 focus:ring-secondary text-xs">
     </div>
-    <div class="w-2/12">
-      <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Acurácia</label>
-      <input type="text" name="medical_request[requested_exams_attributes][NEW_INDEX][acuracia]" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-md focus:ring-1 focus:ring-secondary text-xs text-center font-mono text-emerald-600 bg-emerald-50" placeholder="Ex: 95%">
-    </div>
-    <div class="pt-4 w-16 text-center">
-      <button type="button" onclick="this.closest('.exam-item').remove()" class="text-xs text-red-600 font-bold hover:text-red-800 transition-colors">Remover</button>
+    <div class="pt-4 w-16 flex items-center justify-center">
+      <button type="button" onclick="if(confirm('Deseja mesmo excluir? É uma ação irreversível')) { this.closest('.exam-item').remove() }" class="text-red-500 hover:text-red-700 hover:bg-red-50 p-1.5 rounded transition-colors flex flex-col items-center gap-0.5">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+        <span class="text-[9px] font-bold">Excluir</span>
+      </button>
     </div>
   </div>
 </template>

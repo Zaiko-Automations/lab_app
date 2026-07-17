@@ -25,6 +25,11 @@ class MedicalRequestsController < ApplicationController
     # We do updates inside a transaction
     ActiveRecord::Base.transaction do
       if @medical_request.update(medical_request_params)
+        if params[:commit] == 'Salvar'
+          redirect_to medical_request_path(@medical_request), notice: "Alterações salvas com sucesso. Para enviar para o sistema clique em Validar"
+          return
+        end
+
         # Calculate diff before marking validated
         changes = calculate_changes(@medical_request)
 
@@ -56,7 +61,7 @@ class MedicalRequestsController < ApplicationController
 
   def medical_request_params
     params.require(:medical_request).permit(
-      :tipo, :conversation_id, :link_conversa,
+      :tipo, :especialidade, :conversation_id, :link_conversa,
       patient_attributes: [
         :id, :nome, :cpf, :data_nascimento, :telefone, :whatsapp, :id_whatsapp,
         :convenio, :plano_convenio, :sexo_biologico, :logradouro, :numero, :cep,
