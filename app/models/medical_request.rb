@@ -12,6 +12,7 @@ class MedicalRequest < ApplicationRecord
 
   has_one_attached :documento
   has_one_attached :pedido_medico
+  has_many_attached :pedidos_medicos
   has_one_attached :carteira_convenio
 
   enum status: { pending: 'pending', validated: 'validated' }, _default: 'pending'

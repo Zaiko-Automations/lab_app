@@ -93,8 +93,18 @@ class ProcessWebhookJob < ApplicationJob
 
       # 5. Decode and attach base64 images
       attach_base64(medical_request, :documento, imagens_data[:documento], "documento_#{conversa_id}")
-      attach_base64(medical_request, :pedido_medico, imagens_data[:pedido_medico], "pedido_medico_#{conversa_id}")
       attach_base64(medical_request, :carteira_convenio, imagens_data[:carteira_convenio], "carteira_convenio_#{conversa_id}")
+
+      # Pedido médico: suporta uma ou múltiplas imagens
+      pedido_raw = imagens_data[:pedido_medico]
+      if pedido_raw.is_a?(Array)
+        pedido_raw.each_with_index do |img, idx|
+          attach_base64_many(medical_request, img, "pedido_medico_#{conversa_id}_#{idx}")
+        end
+      elsif pedido_raw.present?
+        attach_base64(medical_request, :pedido_medico, pedido_raw, "pedido_medico_#{conversa_id}")
+        attach_base64_many(medical_request, pedido_raw, "pedido_medico_#{conversa_id}_0")
+      end
     end
 
     receipt.update!(status: 'processed', processed_at: Time.current)
@@ -134,6 +144,35 @@ class ProcessWebhookJob < ApplicationJob
       )
     rescue => e
       Rails.logger.error "Failed to attach base64 file #{filename}: #{e.message}"
+    end
+  end
+
+  def attach_base64_many(record, base64_string, filename)
+    return if base64_string.blank? || base64_string.length < 50
+
+    if base64_string.start_with?('data:')
+      match = base64_string.match(/^data:([^;]+);base64,(.*)$/m)
+      return unless match
+      content_type = match[1]
+      base64_data = match[2]
+    else
+      content_type = 'image/jpeg'
+      base64_data = base64_string
+    end
+
+    ext = content_type == 'application/pdf' ? '.pdf' : '.jpg'
+    final_filename = "#{filename}#{ext}"
+
+    begin
+      decoded_data = Base64.decode64(base64_data)
+      io = StringIO.new(decoded_data)
+      record.pedidos_medicos.attach(
+        io: io,
+        filename: final_filename,
+        content_type: content_type
+      )
+    rescue => e
+      Rails.logger.error "Failed to attach_many base64 file #{filename}: #{e.message}"
     end
   end
 end
