@@ -2,7 +2,7 @@
   ai_patient = @ai_data[:paciente] || {}
   ai_solicitante = @ai_data[:solicitante] || {}
   is_readonly = @medical_request.validated?
-  section_title_class = "text-xs font-bold uppercase tracking-wider border-b border-slate-100 pb-2 text-[#002b47]"
+  section_title_class = "text-xs font-bold uppercase tracking-wider border-b border-slate-100 pb-2 text-[#23c0b5]"
 %>
 
 <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow flex flex-col">
@@ -100,7 +100,7 @@
           <!-- Image Zoom Container -->
           <div id="image-zoom-box" class="origin-center cursor-grab active:cursor-grabbing w-full h-full flex items-center justify-center relative" style="transform: scale(1.0) translate(0px, 0px);">
             <!-- Drawing Canvas Overlay -->
-            <canvas id="drawing-canvas" class="absolute top-0 left-0 w-full h-full pointer-events-none z-10 hidden"></canvas>
+            <canvas id="drawing-canvas" class="absolute top-0 left-0 w-full h-full pointer-events-none z-10"></canvas>
 
             <!-- Pedidos Médicos (multiple support) -->
             <% if @medical_request.pedidos_medicos.attached? %>
@@ -259,7 +259,7 @@
               </div>
 
               <!-- Endereço -->
-              <h5 class="text-xs font-bold text-slate-400 mt-6 mb-2 uppercase tracking-wide">Endereço do Paciente</h5>
+              <h5 class="text-xs font-bold text-[#23c0b5] mt-6 mb-2 uppercase tracking-wide">Endereço do Paciente</h5>
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="flex flex-col md:col-span-2">
                   <%= p.label :logradouro, "Logradouro", class: "text-xs font-bold text-slate-600 mb-1" %>
@@ -526,16 +526,18 @@
   const viewerContainer = document.getElementById('viewer-container');
 
   // --- Canvas setup ---
+  // IMPORTANT: canvas must NOT be hidden initially so offsetWidth/offsetHeight are correct
   function resizeCanvas() {
     if (!canvas) return;
-    const savedData = ctx ? ctx.getImageData(0, 0, canvas.width, canvas.height) : null;
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
+    const w = canvas.offsetWidth;
+    const h = canvas.offsetHeight;
+    if (w === 0 || h === 0) return; // skip if not laid out yet
+    canvas.width = w;
+    canvas.height = h;
     ctx = canvas.getContext('2d');
     ctx.lineWidth = 3;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    if (savedData) ctx.putImageData(savedData, 0, 0);
   }
 
   if (canvas) {
@@ -544,7 +546,8 @@
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     window.addEventListener('resize', resizeCanvas);
-    setTimeout(resizeCanvas, 150);
+    // Use rAF to ensure layout is complete before reading offsetWidth/Height
+    requestAnimationFrame(function() { setTimeout(resizeCanvas, 0); });
   }
 
   // --- Transform ---
@@ -573,18 +576,23 @@
     updateTransform();
   };
 
+  // Pencil SVG cursor (data URI)
+  const PENCIL_CURSOR = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24'%3E%3Cpath fill='%23ffffff' stroke='%23000' stroke-width='0.5' d='M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z'/%3E%3C/svg%3E\") 0 28, crosshair";
+
   window.toggleDrawMode = function() {
     drawMode = !drawMode;
     const btnDraw = document.getElementById('btn-draw');
     if (drawMode) {
       btnDraw.classList.add('bg-secondary', 'ring-2', 'ring-offset-2', 'ring-offset-slate-800');
-      canvas.classList.remove('pointer-events-none', 'hidden');
+      canvas.classList.remove('pointer-events-none');
+      // Resize now that we know the layout (canvas is always visible)
       resizeCanvas();
-      canvas.style.cursor = 'crosshair';
-      if (viewerContainer) viewerContainer.style.cursor = 'crosshair';
+      canvas.style.cursor = PENCIL_CURSOR;
+      if (viewerContainer) viewerContainer.style.cursor = PENCIL_CURSOR;
     } else {
       btnDraw.classList.remove('bg-secondary', 'ring-2', 'ring-offset-2', 'ring-offset-slate-800');
       canvas.classList.add('pointer-events-none');
+      canvas.style.cursor = 'default';
       if (viewerContainer) viewerContainer.style.cursor = 'grab';
     }
   };
